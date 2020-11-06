@@ -1,0 +1,16 @@
+:: StoryData
+{
+        "ifid": "19900ED2-970E-4BB3-BBF9-F6FCC91DB89D",
+        "format": "SugarCube",
+        "format-version": "2.33.2",
+        "zoom": 1
+}
+
+:: StoryInit
+<<set $Storage to {}>>
+
+:: StoryTitle
+The Curse of Nazanem
+
+:: StoryAuthor
+Story by BLloyd
