@@ -1,2 +1,10 @@
 :: Start [nobr]
 <h1>The Curse of Nazanem</h1>
+
+[[Diary]]
+
+:: Diary
+!Diary
+<<diary>>
+
+<<return>>
