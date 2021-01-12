@@ -1,0 +1,6 @@
+:: StoryCaption
+
+Loop: <<= $time.loop>>
+Day: <<= $time.day + 1>>
+Time: <<= $time.getHour>>
+Reality point : <<= $player.realityPoint.current>> / <<= $player.realityPoint.max>>

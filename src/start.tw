@@ -3,6 +3,19 @@
 
 [[Diary]]
 
+<<button "Add hour" "Start">>
+    <<set $time.add(new Time(0, 1, 0))>>
+<</button>>
+
+<<button "Add day" "Start">>
+    <<set $time.add(new Time(1, 0, 0))>>
+<</button>>
+
+<<set _ac to $empress.doing>>
+
+The empress is in <<= _ac.location.name>>
+She is doing: <<= _ac.action>>
+
 :: Diary
 !Diary
 <<diary>>
