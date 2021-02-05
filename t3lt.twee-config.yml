@@ -2,3 +2,9 @@ sugarcube-2:
   macros:
     diary:
       name: diary
+    chooseoption:
+      name: chooseoption
+      container: true
+    optionnal:
+      name: optionnal
+      container: true

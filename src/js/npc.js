@@ -1,11 +1,14 @@
 window.Npc = class Npc extends Serializable {
-    constructor(schedule) {
+    constructor(name, schedule) {
         super();
 
+        this.name = name;
         this.schedule = schedule;
     }
 
-    get doing() {
-        return this.schedule.getPlan();
+    doing(time = State.variables.time) {
+        return this.schedule.getPlan(time);
     }
+
+    get type() { return "Npc" }
 }

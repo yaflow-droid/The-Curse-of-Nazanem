@@ -1,22 +1,11 @@
-:: Start [nobr]
+:: Start [nobr] {"position":"400,100"}
 <h1>The Curse of Nazanem</h1>
 
 [[Diary]]
 
-<<button "Add hour" "Start">>
-    <<set $time.add(new Time(0, 1, 0))>>
-<</button>>
+[[Test Event]]
 
-<<button "Add day" "Start">>
-    <<set $time.add(new Time(1, 0, 0))>>
-<</button>>
-
-<<set _ac to $empress.doing>>
-
-The empress is in <<= _ac.location.name>>
-She is doing: <<= _ac.action>>
-
-:: Diary
+:: Diary {"position":"400,300"}
 !Diary
 <<diary>>
 

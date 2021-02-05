@@ -1,4 +1,4 @@
-:: StoryCaption
+:: StoryCaption {"position":"0,200"}
 
 Loop: <<= $time.loop>>
 Day: <<= $time.day + 1>>
