@@ -3,6 +3,8 @@
 <<set $diary to new Diary()>>
 
 <<set $player to new Player("Living Quarter")>>
+<<set $canMove to true>>
+<<set $debug to false>>
 
 <<set $location to {
     "Living Quarter" : new Location(
@@ -511,5 +513,3 @@
 )>>
 
 <<set $npc to ["$empress", "$princess"]>>
-
-<<= console.log(State.variables)>>

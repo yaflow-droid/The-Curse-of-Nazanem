@@ -1,0 +1,10 @@
+:: PassageHeader
+
+<<set $passage to State.passage>>
+
+:: PassageFooter
+
+<<if $debug>>
+    <hr>
+    <<include "debug">>
+<</if>>

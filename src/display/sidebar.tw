@@ -1,6 +1,16 @@
 :: StoryCaption {"position":"0,200"}
-
+<<tabs "Time" selected>>\
 Loop: <<= $time.loop>>
 Day: <<= $time.dayStr>>
 Time: <<= $time.time>>
 Reality point : <<= $player.realityPoint.current>> / <<= $player.realityPoint.max>>
+<<tab "Location">>\
+    <<travelSelect>>
+<<tab "Skills">>\
+    TODO: Skills
+
+<<tab "Debug">>
+    <<button "Toggle debug" $passage>>
+        <<set $debug = !$debug>>
+    <</button>>
+<</tabs>>

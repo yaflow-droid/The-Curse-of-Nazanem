@@ -1,0 +1,17 @@
+:: debug [nobr]
+<h1>Debug</h1>
+<<tabs "time" selected>>
+
+<ul>
+<li><<link "Add 30min" $passage>>
+    <<= $time.add(0, 0, 30)>>
+<</link>></li>
+<li><<link "Add 1h" $passage>>
+    <<= $time.add(0, 1, 0)>>
+<</link>></li>
+<li><<link "Add 1d" $passage>>
+    <<= $time.add(1, 0, 0)>>
+<</link>></li>
+</ul>
+
+<</tabs>>

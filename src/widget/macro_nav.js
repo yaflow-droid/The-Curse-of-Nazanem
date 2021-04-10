@@ -50,13 +50,45 @@ Macro.add("toggle", {
     }
 })
 
-Macro.add("travelSelect", {
-    tags: [],
+Macro.add("tabs", {
+    tags: ["tab"],
     handler: function() {
-        const DOM = $("<ul></ul>");
+        const DOM = $("<div class='tabs'></div>");
+        const navDOM = $("<div class='tabs-title'></div>");
+        const tabListDOM = $("<ul class='tabs-title-list'></ul>");
+        const contentDOM = $("<div class='tabs-content'></div>");
+
+        this.payload.forEach((payload) => {
+            var tabDOM = $(`<li class="tab-title">${payload.args[0]}</li>`);
+            if (payload.args.length >= 2 && payload.args[1] == "selected") { 
+                tabDOM.addClass("tab-selected");
+                contentDOM.wiki(payload.contents);
+            }
+            $(tabListDOM).append(tabDOM);
+            $(tabDOM).click(() => {
+                $(".tab-title").removeClass("tab-selected");
+                $(tabDOM).addClass("tab-selected");
+                contentDOM.empty();
+                contentDOM.wiki(payload.contents);
+            })
+        })
+        
+        $(navDOM).append(tabListDOM);
+        $(DOM).append(navDOM);
+        $(DOM).append(contentDOM);
+        $(this.output).append(DOM);
+    }
+})
+
+Macro.add("travelSelect", {
+    handler: function() {
+        const DOM = $("<ul class='location-list'></ul>");
         Object.values(State.variables.location).forEach(loc => {
-            const loc_DOM = $(`<li></li>`);
-            loc_DOM.wiki(`<<link "${loc.name}" "Room Template">><<set $player.move("${loc.name}")>><</link>>`)
+            const loc_DOM = $(`<li class='location-item'></li>`);
+            if (State.variables.canMove == true)
+                loc_DOM.wiki(`<<link "${loc.name}" "Room Template">><<set $player.move("${loc.name}")>><</link>>`)
+            else
+                loc_DOM.wiki(`${loc.name}`)
             DOM.append(loc_DOM);
         });
 

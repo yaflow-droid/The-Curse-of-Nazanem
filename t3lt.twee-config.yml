@@ -2,4 +2,8 @@ sugarcube-2:
   macros:
     travelSelect:
       name: travelSelect
+    tabs:
+      name: tabs
       container: true
+    tab:
+      name: tab

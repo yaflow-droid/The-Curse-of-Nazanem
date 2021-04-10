@@ -12,7 +12,6 @@ window.Player = class Player extends Serializable {
         this.currRoom = to;
         
         // Add time to move
-        debugger;
         State.variables.time.add(moveTime.day, moveTime.hour, moveTime.min);
     }
 
