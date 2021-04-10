@@ -52,20 +52,10 @@ window.Time = class Time extends Serializable {
         this.hour = hour;
         this.min = min;
         this.loop = loop;
-        
-        // Custom event trigger
-        publish("onTimeChange", {
-            newTime: this, 
-            oldTime: prev, 
-            diff: Time.compare(prev, this, true)
-        });
-        if (this.loop > prev.loop) { // If new loop
-            publish("onLoopChange", {
-                prevLoop: prev.loop,
-                newLoop: this.loop,
-                diff: this.loop - prev.loop
-            });
-        }
+
+        State.variables.npc.forEach((npcName) => {
+            State.getVar(npcName).updatePos(this);
+        }, this)
     }
 
     /**

@@ -2,7 +2,7 @@
 <<set $time to new Time()>>
 <<set $diary to new Diary()>>
 
-<<set $player to new Player()>>
+<<set $player to new Player("Living Quarter")>>
 
 <<set $location to {
     "Living Quarter" : new Location(
@@ -37,12 +37,6 @@
     ),
     "Beyond the Palace": new Location(
         "Beyond the Palace"
-    ),
-
-
-    // Ment as an error fallback
-    "unknown": new Location(
-        "unknown"
     )
 }>>
 

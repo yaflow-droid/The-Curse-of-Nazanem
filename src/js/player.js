@@ -10,14 +10,10 @@ window.Player = class Player extends Serializable {
         var from = this.currRoom;
 
         this.currRoom = to;
-        State.variables.time.add(moveTime);
-
-        // Triggers the player movement event
-        publish("onPlayerMove", {
-            from, 
-            to,
-            moveTime
-        });
+        
+        // Add time to move
+        debugger;
+        State.variables.time.add(moveTime.day, moveTime.hour, moveTime.min);
     }
 
     get type() { return "Player" }

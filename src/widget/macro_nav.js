@@ -49,3 +49,17 @@ Macro.add("toggle", {
         $(this.output).append(DOM_Content);
     }
 })
+
+Macro.add("travelSelect", {
+    tags: [],
+    handler: function() {
+        const DOM = $("<ul></ul>");
+        Object.values(State.variables.location).forEach(loc => {
+            const loc_DOM = $(`<li></li>`);
+            loc_DOM.wiki(`<<link "${loc.name}" "Room Template">><<set $player.move("${loc.name}")>><</link>>`)
+            DOM.append(loc_DOM);
+        });
+
+        $(this.output).append(DOM);
+    }
+})
