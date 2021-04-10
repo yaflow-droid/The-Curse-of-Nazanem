@@ -1,0 +1,10 @@
+:: InitPlayer
+
+<<set $player to {
+    position: "Living Quarter",
+    realityPoint: {current: 0, max: 2},
+    move: function(destination, duration) {
+        $player.position = destination;
+        $time.add({min: 0});
+    }
+}>>

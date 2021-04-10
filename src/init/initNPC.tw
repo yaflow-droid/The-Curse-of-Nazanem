@@ -1,0 +1,329 @@
+:: InitNPC
+
+<<set setup.npc to {
+    name: "",
+    schedule: [],
+    location: function() {
+        var i = 0;
+        while (i < this.schedule.length - 1 && $time.compare(schedule[i]).diff < 0) {
+            i++;
+        }
+        return this.schedule[i];
+    }
+}>>
+
+<<set $empress to helper.deepClone(setup.npc)>>
+<<set $empress.schedule to [
+    {
+        action: "Sleep",
+        location: "Living Quarter",
+        start: {day: 0, hour: 0}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 0, hour: 7}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 0, hour: 8}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 0, hour: 12}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 0, hour: 13}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 0, hour: 14}
+    },
+    {
+        action: "Court",
+        location: "Royal Court",
+        start: {day: 0, hour: 15}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 0, hour: 21}
+    },
+    {
+        action: "Bathe",
+        location: "The Great Bathhouse",
+        start: {day: 0, hour: 22}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 0, hour: 23}
+    },
+    {
+        action: "Sleep",
+        location: "Living Quarter",
+        start: {day: 1, hour: 0}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 1, hour: 7}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 1, hour: 8}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 1, hour: 12}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 1, hour: 13}
+    },
+    {
+        action: "Celebrations",
+        location: "Great Hall",
+        start: {day: 1, hour: 14}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 1, hour: 20}
+    },
+    {
+        action: "Celebrations",
+        location: "Great Hall",
+        start: {day: 1, hour: 22}
+    },
+    {
+        action: "Sleep",
+        location: "Living Quarter",
+        start: {day: 2, hour: 2}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 2, hour: 7}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 2, hour: 8}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 2, hour: 12}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 2, hour: 13}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 2, hour: 14}
+    },
+    {
+        action: "Court",
+        location: "Royal Court",
+        start: {day: 2, hour: 15}
+    },
+    {
+        action: "Being warned by Astrologer",
+        location: "Royal Court",
+        start: {day: 2, hour: 17}
+    },
+    {
+        action: "Discussing with Magi",
+        location: "Royal Court",
+        start: {day: 2, hour: 18}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 2, hour: 21}
+    },
+    {
+        action: "Bathe",
+        location: "The Great Bathhouse",
+        start: {day: 2, hour: 22}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 2, hour: 23}
+    },
+    {
+        action: "Sleep",
+        location: "Living Quarter",
+        start: {day: 3, hour: 0}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 3, hour: 7}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 3, hour: 8}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 3, hour: 12}
+    },
+    {
+        action: "Bathe",
+        location: "The Great Bathhouse",
+        start: {day: 3, hour: 22}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 3, hour: 23}
+    },
+    {
+        action: "Sleep",
+        location: "Living Quarter",
+        start: {day: 4, hour: 0}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 4, hour: 7}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 4, hour: 8}
+    },
+    {
+        action: "Confronted by peasant",
+        location: "Royal Court",
+        start: {day: 4, hour: 10}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 4, hour: 11}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 4, hour: 13}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 4, hour: 14}
+    },
+    {
+        action: "Court",
+        location: "Royal Court",
+        start: {day: 4, hour: 15}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 4, hour: 21}
+    },
+    {
+        action: "Bathe",
+        location: "The Great Bathhouse",
+        start: {day: 4, hour: 22}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 4, hour: 23}
+    },
+    {
+        action: "Sleep",
+        location: "Living Quarter",
+        start: {day: 5, hour: 0}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 5, hour: 7}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 5, hour: 8}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 5, hour: 12}
+    },
+    {
+        action: "Peasant Court",
+        location: "Royal Court",
+        start: {day: 5, hour: 13}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 5, hour: 14}
+    },
+    {
+        action: "Court",
+        location: "Royal Court",
+        start: {day: 5, hour: 15}
+    },
+    {
+        action: "Facing High Priest",
+        location: "Temple",
+        start: {day: 5, hour: 21}
+    },
+    {
+        action: "Bathe",
+        location: "The Great Bathhouse",
+        start: {day: 5, hour: 22}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 5, hour: 23}
+    },
+    {
+        action: "Sleep",
+        location: "Living Quarter",
+        start: {day: 6, hour: 0}
+    },
+    {
+        action: "Meal",
+        location: "Great Hall",
+        start: {day: 6, hour: 7}
+    },
+    {
+        action: "Peasant Court",
+        location: "Great Hall",
+        start: {day: 6, hour: 8}
+    },
+    {
+        action: "Prayers",
+        location: "Temple",
+        start: {day: 6, hour: 12}
+    },
+    {
+        action: "Wounded and Dying",
+        location: "Temple",
+        start: {day: 6, hour: 13}
+    }
+]>>
+
+<<set $npc to [$empress]>>

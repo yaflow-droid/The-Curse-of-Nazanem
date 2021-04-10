@@ -1,0 +1,81 @@
+:: InitTime
+<<set $time to {
+    min: 0,
+    hour: 0,
+    day: 0,
+    loop: 1,
+    add: function(t) {
+        t = Object.assign({
+            day: 0,
+            hour: 0,
+            min: 0,
+            loop: 0
+        }, t);
+        
+        t.min += $time.min;
+
+        t.hour += $time.hour + Math.floor(t.min / 60);
+        t.min %= 60;
+
+        t.day += $time.day + Math.floor(t.hour / 24);
+        t.hour %= 24;
+
+        t.loop += $time.loop + Math.floor(t.day / 7);
+        t.day %= 7;
+
+        $time.set(t);
+    },
+    set: function(t) {  
+        t = Object.assign({
+            day: 0,
+            hour: 0,
+            min: 0,
+            loop: 0
+        }, t);  
+        $time.min = t.min;
+
+        $time.hour = t.hour + Math.floor($time.min / 60);
+        $time.min %= 60;
+
+        $time.day = t.day + Math.floor($time.hour / 24);
+        $time.hour %= 24;
+
+        $time.loop = t.loop + Math.floor($time.day / 7);
+        $day %= 7;
+    },
+    compare: function(t) {
+        t = Object.assign({
+            day: 0,
+            hour: 0,
+            min: 0,
+            loop: 0
+        }, t); 
+        var day = t.day - $time.day;
+        var hour = t.hour - $time.hour;
+        var min = t.min - $time.min;
+
+        hour += Math.floor(min / 60);
+        day += Math.floor(hour / 24);
+
+        min %= 60;
+        hour %= 24;
+        day %= 7;
+
+        var isEqual = min == 0 && hour == 0 && day == 0;
+        var diff = min + (hour + day * 24) * 60;
+
+        return {
+            min, 
+            hour, 
+            day, 
+            isEqual, 
+            diff
+        };
+    },
+    dayString: function() {
+        return ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"][$time.day];
+    },
+    time: function() {
+        return ("00" + $time.hour).slice(-2) + ":" + ("00" + $time.min).slice(-2);
+    }
+}>>
