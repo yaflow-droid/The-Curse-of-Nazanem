@@ -7,8 +7,17 @@ window.Player = class Player extends Serializable {
     }
 
     move(to, moveTime = new Time(0, 0, 5)) {
+        var from = this.currRoom;
+
         this.currRoom = to;
         State.variables.time.add(moveTime);
+
+        // Triggers the player movement event
+        publish("onPlayerMove", {
+            from, 
+            to,
+            moveTime
+        });
     }
 
     get type() { return "Player" }

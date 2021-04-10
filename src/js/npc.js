@@ -4,11 +4,11 @@ window.Npc = class Npc extends Serializable {
 
         this.name = name;
         this.schedule = schedule;
-    }
+        this.location;
 
-    doing(time = State.variables.time) {
-        return this.schedule.getPlan(time);
+        // Finds new location when times change
+        subscribe("onTimeChange", function(data) {
+            this.location = this.schedule.getPlan(data.newTime)
+        }, this);
     }
-
-    get type() { return "Npc" }
 }

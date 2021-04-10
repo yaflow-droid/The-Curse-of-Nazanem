@@ -5,6 +5,16 @@
 
 [[Test Event]]
 
+<<button "Add 30min" "Start">>
+    <<= $time.add(0, 0, 30)>>
+<</button>>
+<<button "Add 1h" "Start">>
+    <<= $time.add(0, 1, 0)>>
+<</button>>
+<<button "Add 1d" "Start">>
+    <<= $time.add(1, 0, 0)>>
+<</button>>
+
 :: Diary {"position":"400,300"}
 !Diary
 <<diary>>

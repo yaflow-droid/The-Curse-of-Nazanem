@@ -517,3 +517,5 @@
 )>>
 
 <<set $npc to ["$empress", "$princess"]>>
+
+<<= console.log(State.variables)>>

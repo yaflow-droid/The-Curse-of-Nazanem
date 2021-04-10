@@ -1,5 +1,13 @@
 window.helper = {};
 
+/**
+ * Concatenates the list into a list of string
+ * @param {list<string>} list 
+ * @param {function} _toString 
+ * @param {boolean} additive 
+ * @param {boolean} addThe 
+ * @returns 
+ */
 helper.stringifyList = function(list, _toString = (el, i, l) => el, additive = true, addThe = false) {
     let toString = _toString;
     if (addThe) toString = (el, i, l) => {return "the " + _toString(el, i, l)};
