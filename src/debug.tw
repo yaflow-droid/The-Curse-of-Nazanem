@@ -13,5 +13,4 @@
     <<set $time.add({day: 1})>>
 <</link>></li>
 </ul>
-
 <</tabs>>

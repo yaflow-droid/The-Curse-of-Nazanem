@@ -1,11 +1,13 @@
 :: Start [nobr] {"position":"400,100"}
+<<set document.dispatchEvent(new CustomEvent("onStoryStart", {}))>>
+
 <h1>The Curse of Nazanem</h1>
 
-[[Diary]]
+[[Diary]]<br>
 
-[[Test Event]]
+[[Test Event]]<br>
 
-[[Room Template]]
+[[Room Template]]<br>
 
 :: Diary {"position":"400,300"}
 !Diary

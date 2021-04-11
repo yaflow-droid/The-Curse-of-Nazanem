@@ -1,6 +1,6 @@
-:: InitLocation
+:: InitLocation [ init ]
 
-<<set $location to [
+<<set $locations to [
     "Living Quarter",
     "Observation Tower",
     "Great Hall",

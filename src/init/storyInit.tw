@@ -1,7 +1,7 @@
 :: StoryInit {"position":"200,200"}
 <<include "InitTime">>
 
-<<set $diary to {
+<<set $diary to helper.initObject({}, {
     entries: [],
     notes: "",
     addEntry: function(text) {
@@ -9,7 +9,6 @@
         console.log($diary.entires);
     },
     DOM: function() {
-        debugger;
         var DOM = $(`<div class="diary"></div>`);
         
         $diary.entries.forEach((entry) => {
@@ -27,7 +26,11 @@
         
         return DOM;
     }
-}>>
+}, function(obj) {
+    document.addEventListener("onQuestComplete", function(e) {
+        obj.addEntry(e.detail.quest.diary);
+    })
+})>>
 
 <<set $canMove to true>>
 <<set $debug to false>>
@@ -35,3 +38,6 @@
 <<include "InitLocation">>
 <<include "InitPlayer">>
 <<include "InitNPC">>
+
+<!-- WIP -->
+<<include "InitEvents">>

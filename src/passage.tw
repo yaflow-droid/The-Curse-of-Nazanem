@@ -1,8 +1,8 @@
-:: PassageHeader
+:: PassageHeader [nobr]
 
 <<set $passage to State.passage>>
 
-:: PassageFooter
+:: PassageFooter [nobr]
 
 <<if $debug>>
     <hr>

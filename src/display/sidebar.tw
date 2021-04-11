@@ -5,8 +5,7 @@ Day: <<= $time.dayString()>>
 Time: <<= $time.time()>>
 Reality point : <<= $player.realityPoint.current>> / <<= $player.realityPoint.max>>
 <<tab "Location">>\
-    TODO: Movement
-    
+    <<travelSelect>>
 <<tab "Skills">>\
     TODO: Skills
 

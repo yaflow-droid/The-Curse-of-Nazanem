@@ -1,10 +1,17 @@
-:: InitPlayer
+:: InitPlayer [ init ]
 
 <<set $player to {
     position: "Living Quarter",
     realityPoint: {current: 0, max: 2},
-    move: function(destination, duration) {
+    move: function(destination, duration = {min: 5}) {
+        var from = $player.position;
         $player.position = destination;
-        $time.add({min: 0});
+
+        var event = new CustomEvent("onPlayerMove", {detail:{
+            from,
+            destination,
+            duration
+        }});
+        document.dispatchEvent(event);
     }
 }>>

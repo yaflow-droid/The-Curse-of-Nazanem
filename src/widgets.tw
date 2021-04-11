@@ -1,0 +1,15 @@
+:: Widgets [widget nobr]
+
+<<widget "travelSelect">>
+<ul class="location-list">
+    <<for _location range $locations>>
+        <<capture _location>>
+        <<if _location !== $player.position>>
+            <li class="location-list-item"><<link _location "Room Template">><<set $player.move(_location)>><</link>></li>
+        <<else>>
+            <li class="location-list-item location-list-item-current">_location</li>
+        <</if>>
+        <</capture>>
+    <</for>>
+</ul>
+<</widget>>

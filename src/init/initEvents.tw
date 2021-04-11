@@ -1,0 +1,53 @@
+:: InitEvents [ init ]
+
+<<set setup.quest to {
+    defaults: {
+        effect: {
+            apply: function () { return; },
+            text: ""
+        },
+        done: false
+    }
+}>>
+
+<<set $quests to {
+    basics: [
+        helper.initObject(setup.quest.defaults, {
+            goal: "Enter time loop",
+            diary: "I have finally arrived. The lost city of Nazanem is lost no more. Though it seems I may have miscalculated the ritual, no one seems to know that I am present and I cannot leave the great palace itself. All I can do is observe and wait, to see how things play out."
+        }, function(quest) {
+            // Set the new events to end
+
+            var onStoryStartHandler = function(e) {
+                quest.done = true;
+
+                // Stops listening for the storyStart event. "Talk to the hand"
+                document.removeEventListener("onStoryStart",onStoryStartHandler, false);
+
+                // Shout that you've finished the quest, not that anyone cares (except your diary and probably a few other places too)
+                var event = new CustomEvent("onQuestComplete", {detail:{quest: quest}});
+                document.dispatchEvent(event);
+            };
+        
+            document.addEventListener("onStoryStart", onStoryStartHandler)
+        }),
+        helper.initObject(setup.quest.defaults, {
+            goal: "Find out how long the time loop is",
+            diary: "It appears that time within Nazanem is a closed loop, at the end of my first week the Palace and all within it reset to the start of the week. I have discovered that I can subtly influence and direct the unaware. I have a greater degree of control over the situation than they and can effect change on the world and myself."
+        }, function(quest) {
+            var eventHandler = function(e) {
+                console.log(e);
+                // Quest ends if you access the 2nd loop
+                var done = $time.loop > 1;
+
+                if (done && !quest.done) {
+                    quest.done = true;
+                    var event = new CustomEvent("onQuestComplete", {detail:{quest: quest}});
+                    document.dispatchEvent(event);
+                }
+            }
+
+            document.addEventListener("onLoopChange", eventHandler);
+        })
+    ]
+}>>

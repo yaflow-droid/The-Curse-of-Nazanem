@@ -1,3 +1,10 @@
+Macro.add("a", {
+    skipArgs: false,
+    handler: function() {
+        $(this.output).wiki(helper.addArticle(this.args.full))
+    }
+})
+
 Macro.add("optionnal", {
     tags: [],
     handler: function() {
@@ -80,18 +87,8 @@ Macro.add("tabs", {
     }
 })
 
-Macro.add("travelSelect", {
+Macro.add("diary", {
     handler: function() {
-        const DOM = $("<ul class='location-list'></ul>");
-        Object.values(State.variables.location).forEach(loc => {
-            const loc_DOM = $(`<li class='location-item'></li>`);
-            if (State.variables.canMove == true)
-                loc_DOM.wiki(`<<link "${loc.name}" "Room Template">><<set $player.move("${loc.name}")>><</link>>`)
-            else
-                loc_DOM.wiki(`${loc.name}`)
-            DOM.append(loc_DOM);
-        });
-
-        $(this.output).append(DOM);
+        $(this.output).append(State.variables.diary.DOM());
     }
 })
