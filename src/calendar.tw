@@ -20,9 +20,14 @@
     <<for _npc_index = 0; _npc_index < $npc.length; _npc_index++>>
         <<set _npc to State.getVar($npc[_npc_index])>>
         <<set _loc to _npc.getLocation({day: _day, hour: _hour})>>
-        <<if _hour == 0 || Time.compare(_loc.start, {day: _day, hour: _hour}).equal>>
-            <<set _duration to Math.floor((Time.compare({day: _day, hour: _hour}, _loc.end).diff % 1440) / 60)>>
-            <td @rowspan=_duration><<= _loc.location>>: <<= _loc.action>></td>
+
+        <<if _loc.know>>
+            <<if _hour == 0 || Time.compare(_loc.start, {day: _day, hour: _hour}).equal>>
+                <<set _duration to Math.floor((Time.compare({day: _day, hour: _hour}, _loc.end).diff % 1440) / 60)>>
+                <td @rowspan=_duration><<= _loc.location>>: <<= _loc.action>></td>
+            <</if>>
+        <<else>>
+            <td>???</td>
         <</if>>
     <</for>>
 </tr>

@@ -224,7 +224,8 @@ window.EventHandler = class EventHandler extends Serializable {
             onQuestFinish
         */
 
-        console.log(`Triggering event "${event}" with data: `, data);
+        if (State.variables.debug)
+            console.log(`Triggering event "${event}" with data: `, data);
         switch (event) {              
             case "onTimeChange":
                 // Move all npc
@@ -237,10 +238,6 @@ window.EventHandler = class EventHandler extends Serializable {
                 // Execute first
                 sv.time.onPlayerMove(data);
 
-                sv.npc.forEach((npcName) => {
-                    var npc = State.getVar(npcName);
-                    npc.onPlayerMove(data);
-                })
                 break;
             case "onQuestFinish":
                 sv.diary.onQuestFinish(data);
@@ -491,17 +488,13 @@ window.NPC = class NPC extends Serializable {
 
     // To get triggered when time changes
     onTimeChange(data) {
-        this.location = this.getLocation(data.newTime);
-    }
+        var i = 0;
+        while (i < this.schedule.length-1 && Time.compare(this.schedule[i + 1].start, data.newTime, false).later) i++;
+        this.location = this.schedule[i];
 
-    onPlayerMove(data) {
-        if (this.location == data.destination) {
-            console.log(`found ${this.name}`)
-            var i = 0; // Sets that this location is known at this time
-            while (time.compare(this.schedule[i].start).earlier) i++;
+        if (data.newTime.loop > 1 && this.location.location == State.variables.player.position) {
             this.schedule[i].know = true;
         }
-        console.log(`${this.name} is at ${this.location.location}...`, this);
     }
 
     get type() { return "NPC"; }
@@ -613,33 +606,24 @@ window.Time = class Time extends Serializable {
         this.loop = time.loop + Math.floor(this.day / 7);
         this.day %= 7;
 
-        var compare = Time.compare(oldTime, this);
+        var compare = Time.compare(oldTime, this, true);
 
         if (!compare.equal) {
             setup.eventHandler.trigger("onTimeChange", {
                 oldTime,
                 newTime: this,
-                compare: Time.compare(oldTime, this) // comparison between both time
+                compare: Time.compare(oldTime, this, true) // comparison between both time
             });
         }
     }
 
-    static compare(timeA, timeB = State.variables.time) {
-        if (!timeA instanceof Time) {
-            timeA = Object.assign({
-                day: 0,
-                hour: 0,
-                min: 0,
-                loop: 1
-            }, timeA);
-        }
-        if (!timeB instanceof Time) {
-            timeB = Object.assign({
-                day: 0,
-                hour: 0,
-                min: 0,
-                loop: 1
-            }, timeB);
+    static compare(timeA, timeB = State.variables.time, countloop) {
+        timeA = new Time(timeA.day, timeA.hour, timeA.min, timeA.loop);
+        timeB = new Time(timeB.day, timeB.hour, timeB.min, timeB.loop);
+
+        if (!countloop) {
+            timeA.loop = 1;
+            timeB.loop = 1;
         }
 
         var difference = Time.toMin(timeB) - Time.toMin(timeA);
@@ -693,9 +677,14 @@ window.Time = class Time extends Serializable {
     &lt;&lt;for _npc_index = 0; _npc_index &lt; $npc.length; _npc_index++&gt;&gt;
         &lt;&lt;set _npc to State.getVar($npc[_npc_index])&gt;&gt;
         &lt;&lt;set _loc to _npc.getLocation({day: _day, hour: _hour})&gt;&gt;
-        &lt;&lt;if _hour == 0 || Time.compare(_loc.start, {day: _day, hour: _hour}).equal&gt;&gt;
-            &lt;&lt;set _duration to Math.floor((Time.compare({day: _day, hour: _hour}, _loc.end).diff % 1440) / 60)&gt;&gt;
-            &lt;td @rowspan=_duration&gt;&lt;&lt;= _loc.location&gt;&gt;: &lt;&lt;= _loc.action&gt;&gt;&lt;/td&gt;
+
+        &lt;&lt;if _loc.know&gt;&gt;
+            &lt;&lt;if _hour == 0 || Time.compare(_loc.start, {day: _day, hour: _hour}).equal&gt;&gt;
+                &lt;&lt;set _duration to Math.floor((Time.compare({day: _day, hour: _hour}, _loc.end).diff % 1440) / 60)&gt;&gt;
+                &lt;td @rowspan=_duration&gt;&lt;&lt;= _loc.location&gt;&gt;: &lt;&lt;= _loc.action&gt;&gt;&lt;/td&gt;
+            &lt;&lt;/if&gt;&gt;
+        &lt;&lt;else&gt;&gt;
+            &lt;td&gt;???&lt;/td&gt;
         &lt;&lt;/if&gt;&gt;
     &lt;&lt;/for&gt;&gt;
 &lt;/tr&gt;

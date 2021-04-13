@@ -18,17 +18,13 @@ window.NPC = class NPC extends Serializable {
 
     // To get triggered when time changes
     onTimeChange(data) {
-        this.location = this.getLocation(data.newTime);
-    }
+        var i = 0;
+        while (i < this.schedule.length-1 && Time.compare(this.schedule[i + 1].start, data.newTime, false).later) i++;
+        this.location = this.schedule[i];
 
-    onPlayerMove(data) {
-        if (this.location == data.destination) {
-            console.log(`found ${this.name}`)
-            var i = 0; // Sets that this location is known at this time
-            while (time.compare(this.schedule[i].start).earlier) i++;
+        if (data.newTime.loop > 1 && this.location.location == State.variables.player.position) {
             this.schedule[i].know = true;
         }
-        console.log(`${this.name} is at ${this.location.location}...`, this);
     }
 
     get type() { return "NPC"; }

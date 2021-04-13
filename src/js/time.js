@@ -55,33 +55,24 @@ window.Time = class Time extends Serializable {
         this.loop = time.loop + Math.floor(this.day / 7);
         this.day %= 7;
 
-        var compare = Time.compare(oldTime, this);
+        var compare = Time.compare(oldTime, this, true);
 
         if (!compare.equal) {
             setup.eventHandler.trigger("onTimeChange", {
                 oldTime,
                 newTime: this,
-                compare: Time.compare(oldTime, this) // comparison between both time
+                compare: Time.compare(oldTime, this, true) // comparison between both time
             });
         }
     }
 
-    static compare(timeA, timeB = State.variables.time) {
-        if (!timeA instanceof Time) {
-            timeA = Object.assign({
-                day: 0,
-                hour: 0,
-                min: 0,
-                loop: 1
-            }, timeA);
-        }
-        if (!timeB instanceof Time) {
-            timeB = Object.assign({
-                day: 0,
-                hour: 0,
-                min: 0,
-                loop: 1
-            }, timeB);
+    static compare(timeA, timeB = State.variables.time, countloop) {
+        timeA = new Time(timeA.day, timeA.hour, timeA.min, timeA.loop);
+        timeB = new Time(timeB.day, timeB.hour, timeB.min, timeB.loop);
+
+        if (!countloop) {
+            timeA.loop = 1;
+            timeB.loop = 1;
         }
 
         var difference = Time.toMin(timeB) - Time.toMin(timeA);

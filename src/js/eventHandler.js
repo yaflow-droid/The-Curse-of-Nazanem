@@ -12,7 +12,8 @@ window.EventHandler = class EventHandler extends Serializable {
             onQuestFinish
         */
 
-        console.log(`Triggering event "${event}" with data: `, data);
+        if (State.variables.debug)
+            console.log(`Triggering event "${event}" with data: `, data);
         switch (event) {              
             case "onTimeChange":
                 // Move all npc
@@ -25,10 +26,6 @@ window.EventHandler = class EventHandler extends Serializable {
                 // Execute first
                 sv.time.onPlayerMove(data);
 
-                sv.npc.forEach((npcName) => {
-                    var npc = State.getVar(npcName);
-                    npc.onPlayerMove(data);
-                })
                 break;
             case "onQuestFinish":
                 sv.diary.onQuestFinish(data);
