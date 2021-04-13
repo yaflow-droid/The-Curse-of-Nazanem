@@ -60,7 +60,9 @@ Macro.add("toggle", {
 Macro.add("tabs", {
     tags: ["tab"],
     handler: function() {
-        const DOM = $("<div class='tabs'></div>");
+        const vertical = this.args[this.args.length - 1] != "horizontal";
+
+        const DOM = $(`<div class='tabs ${vertical ? "tabs-vertical" : "tabs-horizontal"}'></div>`);
         const navDOM = $("<div class='tabs-title'></div>");
         const tabListDOM = $("<ul class='tabs-title-list'></ul>");
         const contentDOM = $("<div class='tabs-content'></div>");
@@ -89,6 +91,6 @@ Macro.add("tabs", {
 
 Macro.add("diary", {
     handler: function() {
-        $(this.output).append(State.variables.diary.DOM());
+        $(this.output).append(State.variables.diary.DOM);
     }
 })

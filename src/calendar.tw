@@ -1,0 +1,32 @@
+:: Calendar [nobr]
+<h1>Calendar</h1>
+
+<<for _day = 0; _day < 7; _day++>>
+
+<h2>Day <<= _day + 1>></h2>
+
+<table class="calendar">
+<thead>
+<tr>
+    <td>Time</td>
+    <<for _npc_index = 0; _npc_index < $npc.length; _npc_index++>>
+        <td><<= State.getVar($npc[_npc_index]).name>></td>
+    <</for>>
+</tr>
+</thead>
+<<for _hour = 0; _hour < 24; _hour++>>
+<tr>
+    <td><<= ("00" + _hour).slice(-2)>>:00</td>
+    <<for _npc_index = 0; _npc_index < $npc.length; _npc_index++>>
+        <<set _npc to State.getVar($npc[_npc_index])>>
+        <<set _loc to _npc.getLocation({day: _day, hour: _hour})>>
+        <<if _hour == 0 || Time.compare(_loc.start, {day: _day, hour: _hour}).equal>>
+            <<set _duration to Math.floor((Time.compare({day: _day, hour: _hour}, _loc.end).diff % 1440) / 60)>>
+            <td @rowspan=_duration><<= _loc.location>>: <<= _loc.action>></td>
+        <</if>>
+    <</for>>
+</tr>
+<</for>>
+</table>
+
+<</for>>

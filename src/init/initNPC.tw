@@ -1,44 +1,8 @@
 :: InitNPC [ init ]
 
-<<set setup.npc to {
-    defaults: {
-        name: "",
-        schedule: []
-    },
-    debug: function(npcData) {
-        console.log(`%c${npcData.name}`, "font-weight:bold;");
-        console.log(npcData.location());
-        console.table(npcData.schedule);
-        console.log(npcData);
-    },
-    init: function(obj) {
-        var timeHandler = function (e) {
-            var i = 0;
-            while (i < obj.schedule.length - 1 && $time.compare(obj.schedule[i]).diff < 0) {
-                i++;
-            }
-            obj.position = obj.schedule[i];
-        };
-        document.addEventListener("onTimeChange", timeHandler);
-    
-        var playerMoveHandler = function(e) {
-            // If the npc is in the same place as the player, sets it postion to known
-            // Only remember after the first loop
-            if (obj.position == e.detail.destination && $time.loop > 1) {
-                var i = 0;
-                while (i < obj.schedule.length - 1 && $time.compare(obj.schedule[i]).diff < 0) {
-                    i++;
-                }
-                obj.schedule[i].know = true;
-            }
-        };
-        document.addEventListener("onPlayerMove", playerMoveHandler);
-    }
-}>>
-
-<<set $empress to helper.initObject(setup.npc.defaults, {
-    name: "Empress",
-    schedule: [
+<<set $empress to new NPC(
+    "Empress",
+    [
     {
         action: "Sleep",
         location: "Living Quarter",
@@ -349,8 +313,6 @@
         location: "Temple",
         start: {day: 6, hour: 13}
     }
-]}, function(obj) {
-    setup.npc.init(obj);
-})>>
+])>>
 
-<<set $npc to [$empress]>>
+<<set $npc to ["$empress"]>>

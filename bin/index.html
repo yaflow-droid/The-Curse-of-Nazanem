@@ -98,7 +98,7 @@ var LZString={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234
 		<div id="init-lacking">Your browser lacks required capabilities. Please upgrade it or switch to another to continue.</div>
 		<div id="init-loading"><div>Loading&hellip;</div></div>
 	</div>
-	<!-- UUID://19900ED2-970E-4BB3-BBF9-F6FCC91DB89D// --><tw-storydata name="The Curse of Nazanem" startnode="12" creator="Tweego" creator-version="2.1.1+81d1d71" ifid="19900ED2-970E-4BB3-BBF9-F6FCC91DB89D" zoom="1" format="SugarCube" format-version="2.35.0" options="" hidden><style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">/* twine-user-stylesheet #1: "sidebar.css" */
+	<!-- UUID://19900ED2-970E-4BB3-BBF9-F6FCC91DB89D// --><tw-storydata name="The Curse of Nazanem" startnode="11" creator="Tweego" creator-version="2.1.1+81d1d71" ifid="19900ED2-970E-4BB3-BBF9-F6FCC91DB89D" zoom="1" format="SugarCube" format-version="2.35.0" options="" hidden><style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">/* twine-user-stylesheet #1: "sidebar.css" */
 .tabs-title {
     overflow: hidden;
     
@@ -148,7 +148,114 @@ li.tab-selected {
 
 .link-disabled, .link-disabled:hover {
     text-decoration: none;
-}</style><script role="script" id="twine-user-script" type="text/twine-javascript">/* twine-user-script #1: "helper.js" */
+}
+
+.calendar td {
+    border: 1px solid #444;
+    text-align: center;
+}</style><script role="script" id="twine-user-script" type="text/twine-javascript">/* twine-user-script #1: "000_Serializable.js" */
+window.Serializable = class Serializable {
+    constructor() {}
+
+    _init(obj) {
+        Object.keys(obj).forEach(key => {
+            this[key] = clone(obj[key])
+        });
+        return this;
+    }
+    clone() { return (new this.constructor())._init(this); }
+    toJSON() {
+        let ownData = {};
+        Object.keys(this).forEach(key => {
+            ownData[key] = clone(this[key])
+        });
+        return JSON.reviveWrapper(`(new ${this.type}())._init($ReviveData$)`, ownData)
+    }
+    get type() {return this.constructor.name}
+}
+/* twine-user-script #2: "diary.js" */
+window.Diary = class Diary extends Serializable {
+    constructor() {
+        super();
+
+        this.entries = [];
+        this.playerNotes = "";
+    }
+
+    addEntry(text) {
+        this.entries.push(text);
+    }
+
+    onQuestFinish(data) {
+        this.addEntry(data.diary);
+    }
+    
+    get DOM() {
+        var DOM = $(`<div class="diary"></div>`);
+        
+        this.entries.forEach((entry) => {
+            var entryDOM = $(`<p class="diary-entry">${entry}</p>`);
+            DOM.append(entryDOM);
+        });
+        
+        var notesDOM = $(`<p contenteditable>${this.notes}</p>`);
+        notesDOM.on("input", (e) => {
+           this.notes = notesDOM.text();
+        });
+
+        DOM.append(notesDOM);
+        return DOM;
+    }
+
+    get type() { return "Diary"; }
+}
+/* twine-user-script #3: "eventHandler.js" */
+window.EventHandler = class EventHandler extends Serializable {
+    constructor() {
+        super();
+    }
+
+    trigger(event, data) { // Maybe improve this later
+        var sv = State.variables;
+
+        /* Current events are:
+            onTimeChange
+            onPlayerMove
+            onQuestFinish
+        */
+
+        console.log(`Triggering event "${event}" with data: `, data);
+        switch (event) {              
+            case "onTimeChange":
+                // Move all npc
+                sv.npc.forEach((npcName) => {
+                    var npc = State.getVar(npcName);
+                    npc.onTimeChange(data);
+                })
+                break;
+            case "onPlayerMove":
+                // Execute first
+                sv.time.onPlayerMove(data);
+
+                sv.npc.forEach((npcName) => {
+                    var npc = State.getVar(npcName);
+                    npc.onPlayerMove(data);
+                })
+                break;
+            case "onQuestFinish":
+                sv.diary.onQuestFinish(data);
+                break;
+        }
+
+        // Trigger for each quest
+        sv.questList.forEach((quest) => {
+            quest.triggerEvent(event, data);
+        })
+    }
+
+    get type() { return "EventHandler"; }
+}
+/* twine-user-script #4: "helper.js" */
 window.helper = {};
 
 helper.deepClone = function (inObject, outObject = {}) {
@@ -178,10 +285,9 @@ helper.completeAssign = function (target, ...sources) {
     return target;
 }
 
-helper.initObject = function(defaults, values, listnerInit = (obj) => {}) {
+helper.initObject = function(defaults, values, listenerInit = (obj) => {}) {
     const obj = helper.completeAssign({}, defaults, values);
-    listnerInit(obj);
-    return obj;
+    return listenerInit(obj);
 }
 
 
@@ -267,7 +373,7 @@ helper.indefiniteArticle = function (phrase) {
     return "a";
 }
 helper.addArticle = function (phrase) { return `${helper.indefiniteArticle(phrase)} ${phrase}` }
-/* twine-user-script #2: "macro_nav.js" */
+/* twine-user-script #5: "macro_nav.js" */
 Macro.add("a", {
     skipArgs: false,
     handler: function() {
@@ -330,7 +436,9 @@ Macro.add("toggle", {
 Macro.add("tabs", {
     tags: ["tab"],
     handler: function() {
-        const DOM = $("<div class='tabs'></div>");
+        const vertical = this.args[this.args.length - 1] != "horizontal";
+
+        const DOM = $(`<div class='tabs ${vertical ? "tabs-vertical" : "tabs-horizontal"}'></div>`);
         const navDOM = $("<div class='tabs-title'></div>");
         const tabListDOM = $("<ul class='tabs-title-list'></ul>");
         const contentDOM = $("<div class='tabs-content'></div>");
@@ -359,9 +467,242 @@ Macro.add("tabs", {
 
 Macro.add("diary", {
     handler: function() {
-        $(this.output).append(State.variables.diary.DOM());
+        $(this.output).append(State.variables.diary.DOM);
     }
-})</script><tw-passagedata pid="1" name="debug" tags="nobr" position="100,100" size="100,100">&lt;h1&gt;Debug&lt;/h1&gt;
+})
+/* twine-user-script #6: "npc.js" */
+window.NPC = class NPC extends Serializable {
+    constructor(name, schedule) {
+        super();
+
+        this.name = name;
+        this.schedule = schedule;
+    }
+
+    getLocation(time) {
+        var i = 0; // find schedule corresponding
+        while (i < this.schedule.length-1 && Time.compare(this.schedule[i + 1].start, time).later) i++;
+        return {
+            ...this.schedule[i], 
+            end:Time.compare(time, this.schedule[(i+1)%this.schedule.length].start).sameDay ? this.schedule[(i+1)%this.schedule.length].start : {day: this.schedule[i].start.day, hour: 24}
+            // Grabs the start of the next location in schedule
+        };
+    }
+
+    // To get triggered when time changes
+    onTimeChange(data) {
+        this.location = this.getLocation(data.newTime);
+    }
+
+    onPlayerMove(data) {
+        if (this.location == data.destination) {
+            console.log(`found ${this.name}`)
+            var i = 0; // Sets that this location is known at this time
+            while (time.compare(this.schedule[i].start).earlier) i++;
+            this.schedule[i].know = true;
+        }
+        console.log(`${this.name} is at ${this.location.location}...`, this);
+    }
+
+    get type() { return "NPC"; }
+}
+/* twine-user-script #7: "player.js" */
+window.Player = class Player extends Serializable {
+    constructor(position) {
+        super();
+        
+        this.position = position;
+        this.realityPoint = {current: 0, max: 2};
+    }
+
+    move(destination, duration = {min: 5}) {
+        var from = this.position;
+        this.position = destination;
+
+        setup.eventHandler.trigger("onPlayerMove", {
+            from,
+            destination,
+            duration
+        })
+    }
+}
+/* twine-user-script #8: "quest.js" */
+window.Quest = class Quest extends Serializable {
+    constructor(_goal, _diary, _eventHandler) {
+        super();
+
+        this.goal = _goal;
+        this.diary = _diary;
+        this.eventHandler = _eventHandler;
+
+        this.done = false;
+    }
+
+    triggerEvent(eventName, data) {
+        if (this.done) return;
+
+        if (this.eventHandler[eventName] != undefined) {
+            this.eventHandler[eventName].call(this, data);
+        }
+
+        if (this.done) { // TODO: Add rewards
+            setup.eventHandler.trigger("onQuestFinish", {
+                quest: this,
+                diary: this.diary
+            });
+        }
+    }
+
+    get type() { return "Quest"; }
+}
+/* twine-user-script #9: "time.js" */
+window.Time = class Time extends Serializable {
+    constructor(_day = 0, _hour = 0, _min = 0, _loop = 1) {
+        super();
+
+        this.min = _min;
+
+        this.hour = _hour + Math.floor(this.min / 60);
+        this.min %= 60;
+
+        this.day = _day + Math.floor(this.hour / 24);
+        this.hour %= 24;
+
+        this.loop = _loop + Math.floor(this.day / 7);
+        this.day %= 7;
+    }
+
+    add(time) {
+        time = Object.assign({
+            day: 0,
+            hour: 0,
+            min: 0,
+            loop: 0
+        }, time);
+
+        this.set({
+            day: time.day + this.day,
+            hour: time.hour + this.hour,
+            min: time.min + this.min,
+            loop: time.loop + this.loop
+        });
+    }
+
+    set(time) {
+        var oldTime = {
+            day: this.day || 0,
+            hour: this.hour || 0,
+            min: this.min || 0,
+            loop: this.loop || 1
+        };
+        time = Object.assign({
+            day: oldTime.day,
+            hour: oldTime.hour,
+            min: oldTime.min,
+            loop: oldTime.loop
+        }, time);
+
+        this.min = time.min;
+
+        this.hour = time.hour + Math.floor(this.min / 60);
+        this.min %= 60;
+
+        this.day = time.day + Math.floor(this.hour / 24);
+        this.hour %= 24;
+
+        this.loop = time.loop + Math.floor(this.day / 7);
+        this.day %= 7;
+
+        var compare = Time.compare(oldTime, this);
+
+        if (!compare.equal) {
+            setup.eventHandler.trigger("onTimeChange", {
+                oldTime,
+                newTime: this,
+                compare: Time.compare(oldTime, this) // comparison between both time
+            });
+        }
+    }
+
+    static compare(timeA, timeB = State.variables.time) {
+        if (!timeA instanceof Time) {
+            timeA = Object.assign({
+                day: 0,
+                hour: 0,
+                min: 0,
+                loop: 1
+            }, timeA);
+        }
+        if (!timeB instanceof Time) {
+            timeB = Object.assign({
+                day: 0,
+                hour: 0,
+                min: 0,
+                loop: 1
+            }, timeB);
+        }
+
+        var difference = Time.toMin(timeB) - Time.toMin(timeA);
+        return {
+            diff: Math.abs(difference) % 10080, // difference of time excluding loop
+            equal: difference == 0,
+            earlier: difference <= 0, // TimeA is later
+            later: difference >= 0, // TimeB is later
+            sameLoop: timeA.loop == timeB.loop,
+            sameDay: timeA.day == timeB.day,
+            min: difference >= 0 ? timeA : timeB,
+            max: difference <= 0 ? timeA : timeB
+        }
+    }
+
+    static toMin(time) {
+        return (time.min || 0) + ((time.hour || 0) + ((time.day || 0) + (time.loop || 1) * 7) * 24) * 60
+    }
+
+    onPlayerMove(data) {
+        this.add(data.duration);
+    }
+
+    get dayString() {
+        return ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"][this.day];
+    }
+
+    get time() {
+        return ("00" + this.hour).slice(-2) + ":" + ("00" + this.min).slice(-2);
+    }
+
+    get type() { return "Time"; }
+}</script><tw-passagedata pid="1" name="Calendar" tags="nobr" position="100,100" size="100,100">&lt;h1&gt;Calendar&lt;/h1&gt;
+
+&lt;&lt;for _day = 0; _day &lt; 7; _day++&gt;&gt;
+
+&lt;h2&gt;Day &lt;&lt;= _day + 1&gt;&gt;&lt;/h2&gt;
+
+&lt;table class=&quot;calendar&quot;&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+    &lt;td&gt;Time&lt;/td&gt;
+    &lt;&lt;for _npc_index = 0; _npc_index &lt; $npc.length; _npc_index++&gt;&gt;
+        &lt;td&gt;&lt;&lt;= State.getVar($npc[_npc_index]).name&gt;&gt;&lt;/td&gt;
+    &lt;&lt;/for&gt;&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;&lt;for _hour = 0; _hour &lt; 24; _hour++&gt;&gt;
+&lt;tr&gt;
+    &lt;td&gt;&lt;&lt;= (&quot;00&quot; + _hour).slice(-2)&gt;&gt;:00&lt;/td&gt;
+    &lt;&lt;for _npc_index = 0; _npc_index &lt; $npc.length; _npc_index++&gt;&gt;
+        &lt;&lt;set _npc to State.getVar($npc[_npc_index])&gt;&gt;
+        &lt;&lt;set _loc to _npc.getLocation({day: _day, hour: _hour})&gt;&gt;
+        &lt;&lt;if _hour == 0 || Time.compare(_loc.start, {day: _day, hour: _hour}).equal&gt;&gt;
+            &lt;&lt;set _duration to Math.floor((Time.compare({day: _day, hour: _hour}, _loc.end).diff % 1440) / 60)&gt;&gt;
+            &lt;td @rowspan=_duration&gt;&lt;&lt;= _loc.location&gt;&gt;: &lt;&lt;= _loc.action&gt;&gt;&lt;/td&gt;
+        &lt;&lt;/if&gt;&gt;
+    &lt;&lt;/for&gt;&gt;
+&lt;/tr&gt;
+&lt;&lt;/for&gt;&gt;
+&lt;/table&gt;
+
+&lt;&lt;/for&gt;&gt;</tw-passagedata><tw-passagedata pid="2" name="debug" tags="nobr" position="225,100" size="100,100">&lt;h1&gt;Debug&lt;/h1&gt;
 &lt;&lt;tabs &quot;time&quot; selected&gt;&gt;
 
 &lt;ul&gt;
@@ -375,11 +716,12 @@ Macro.add("diary", {
     &lt;&lt;set $time.add({day: 1})&gt;&gt;
 &lt;&lt;/link&gt;&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;&lt;/tabs&gt;&gt;</tw-passagedata><tw-passagedata pid="2" name="StoryCaption" tags="" position="0,200" size="100,100">&lt;&lt;tabs &quot;Time&quot; selected&gt;&gt;\
+&lt;&lt;/tabs&gt;&gt;</tw-passagedata><tw-passagedata pid="3" name="StoryCaption" tags="" position="0,200" size="100,100">&lt;&lt;tabs &quot;Time&quot; selected&gt;&gt;\
 Loop: &lt;&lt;= $time.loop&gt;&gt;
-Day: &lt;&lt;= $time.dayString()&gt;&gt;
-Time: &lt;&lt;= $time.time()&gt;&gt;
+Day: &lt;&lt;= $time.dayString&gt;&gt;
+Time: &lt;&lt;= $time.time&gt;&gt;
 Reality point : &lt;&lt;= $player.realityPoint.current&gt;&gt; / &lt;&lt;= $player.realityPoint.max&gt;&gt;
+[[Calendar]]
 &lt;&lt;tab &quot;Location&quot;&gt;&gt;\
     &lt;&lt;travelSelect&gt;&gt;
 &lt;&lt;tab &quot;Skills&quot;&gt;&gt;\
@@ -389,57 +731,7 @@ Reality point : &lt;&lt;= $player.realityPoint.current&gt;&gt; / &lt;&lt;= $play
     &lt;&lt;button &quot;Toggle debug&quot; $passage&gt;&gt;
         &lt;&lt;set $debug = !$debug&gt;&gt;
     &lt;&lt;/button&gt;&gt;
-&lt;&lt;/tabs&gt;&gt;</tw-passagedata><tw-passagedata pid="3" name="InitEvents" tags="" position="350,100" size="100,100">&lt;&lt;set setup.quest to {
-    defaults: {
-        effect: {
-            apply: function () { return; },
-            text: &quot;&quot;
-        },
-        done: false
-    }
-}&gt;&gt;
-
-&lt;&lt;set $quests to {
-    basics: [
-        helper.initObject(setup.quest.defaults, {
-            goal: &quot;Enter time loop&quot;,
-            diary: &quot;I have finally arrived. The lost city of Nazanem is lost no more. Though it seems I may have miscalculated the ritual, no one seems to know that I am present and I cannot leave the great palace itself. All I can do is observe and wait, to see how things play out.&quot;
-        }, function(quest) {
-            // Set the new events to end
-
-            var onStoryStartHandler = function(e) {
-                quest.done = true;
-
-                // Stops listening for the storyStart event. &quot;Talk to the hand&quot;
-                document.removeEventListener(&quot;onStoryStart&quot;,onStoryStartHandler, false);
-
-                // Shout that you&#39;ve finished the quest, not that anyone cares (except your diary and probably a few other places too)
-                var event = new CustomEvent(&quot;onQuestComplete&quot;, {detail:{quest: quest}});
-                document.dispatchEvent(event);
-            };
-        
-            document.addEventListener(&quot;onStoryStart&quot;, onStoryStartHandler)
-        }),
-        helper.initObject(setup.quest.defaults, {
-            goal: &quot;Find out how long the time loop is&quot;,
-            diary: &quot;It appears that time within Nazanem is a closed loop, at the end of my first week the Palace and all within it reset to the start of the week. I have discovered that I can subtly influence and direct the unaware. I have a greater degree of control over the situation than they and can effect change on the world and myself.&quot;
-        }, function(quest) {
-            var eventHandler = function(e) {
-                console.log(e);
-                // Quest ends if you access the 2nd loop
-                var done = $time.loop &gt; 1;
-
-                if (done &amp;&amp; !quest.done) {
-                    quest.done = true;
-                    var event = new CustomEvent(&quot;onQuestComplete&quot;, {detail:{quest: quest}});
-                    document.dispatchEvent(event);
-                }
-            }
-
-            document.addEventListener(&quot;onLoopChange&quot;, eventHandler);
-        })
-    ]
-}&gt;&gt;</tw-passagedata><tw-passagedata pid="4" name="InitLocation" tags="" position="475,100" size="100,100">&lt;&lt;set $locations to [
+&lt;&lt;/tabs&gt;&gt;</tw-passagedata><tw-passagedata pid="4" name="InitLocation" tags="init" position="475,100" size="100,100">&lt;&lt;set $locations to [
     &quot;Living Quarter&quot;,
     &quot;Observation Tower&quot;,
     &quot;Great Hall&quot;,
@@ -451,45 +743,9 @@ Reality point : &lt;&lt;= $player.realityPoint.current&gt;&gt; / &lt;&lt;= $play
     &quot;Training Hall&quot;,
     &quot;Following Someone Else&quot;,
     &quot;Beyond the Palace&quot;
-]&gt;&gt;</tw-passagedata><tw-passagedata pid="5" name="InitNPC" tags="" position="600,100" size="100,100">&lt;&lt;set setup.npc to {
-    defaults: {
-        name: &quot;&quot;,
-        schedule: []
-    },
-    debug: function(npcData) {
-        console.log(`%c${npcData.name}`, &quot;font-weight:bold;&quot;);
-        console.log(npcData.location());
-        console.table(npcData.schedule);
-        console.log(npcData);
-    },
-    init: function(obj) {
-        var timeHandler = function (e) {
-            var i = 0;
-            while (i &lt; obj.schedule.length - 1 &amp;&amp; $time.compare(obj.schedule[i]).diff &lt; 0) {
-                i++;
-            }
-            obj.position = obj.schedule[i];
-        };
-        document.addEventListener(&quot;onTimeChange&quot;, timeHandler);
-    
-        var playerMoveHandler = function(e) {
-            // If the npc is in the same place as the player, sets it postion to known
-            // Only remember after the first loop
-            if (obj.position == e.detail.destination &amp;&amp; $time.loop &gt; 1) {
-                var i = 0;
-                while (i &lt; obj.schedule.length - 1 &amp;&amp; $time.compare(obj.schedule[i]).diff &lt; 0) {
-                    i++;
-                }
-                obj.schedule[i].know = true;
-            }
-        };
-        document.addEventListener(&quot;onPlayerMove&quot;, playerMoveHandler);
-    }
-}&gt;&gt;
-
-&lt;&lt;set $empress to helper.initObject(setup.npc.defaults, {
-    name: &quot;Empress&quot;,
-    schedule: [
+]&gt;&gt;</tw-passagedata><tw-passagedata pid="5" name="InitNPC" tags="init" position="600,100" size="100,100">&lt;&lt;set $empress to new NPC(
+    &quot;Empress&quot;,
+    [
     {
         action: &quot;Sleep&quot;,
         location: &quot;Living Quarter&quot;,
@@ -800,185 +1056,42 @@ Reality point : &lt;&lt;= $player.realityPoint.current&gt;&gt; / &lt;&lt;= $play
         location: &quot;Temple&quot;,
         start: {day: 6, hour: 13}
     }
-]}, function(obj) {
-    setup.npc.init(obj);
-})&gt;&gt;
+])&gt;&gt;
 
-&lt;&lt;set $npc to [$empress]&gt;&gt;</tw-passagedata><tw-passagedata pid="6" name="InitPlayer" tags="" position="725,100" size="100,100">&lt;&lt;set $player to {
-    position: &quot;Living Quarter&quot;,
-    realityPoint: {current: 0, max: 2},
-    move: function(destination, duration = {min: 5}) {
-        var from = $player.position;
-        $player.position = destination;
-
-        var event = new CustomEvent(&quot;onPlayerMove&quot;, {detail:{
-            from,
-            destination,
-            duration
-        }});
-        document.dispatchEvent(event);
-    }
-}&gt;&gt;</tw-passagedata><tw-passagedata pid="7" name="InitTime" tags="" position="850,100" size="100,100">&lt;&lt;set $time to helper.initObject({}, {
-    min: 0,
-    hour: 0,
-    day: 0,
-    loop: 1, // Loop starts at one for the simplicity of the display
-    add: function(t) {
-        t = Object.assign({
-            day: 0,
-            hour: 0,
-            min: 0,
-            loop: 0
-        }, t);
-        
-        t.min += $time.min;
-
-        t.hour += $time.hour + Math.floor(t.min / 60);
-        t.min %= 60;
-
-        t.day += $time.day + Math.floor(t.hour / 24);
-        t.hour %= 24;
-
-        t.loop += $time.loop + Math.floor(t.day / 7);
-        t.day %= 7;
-
-        $time.set(t);
-    },
-    set: function(t) { 
-        var oldTime = {
-            hour: $time.hour, 
-            min: $time.min, 
-            day: $time.day, 
-            loop: $time.loop
-        }; 
-        t = Object.assign({
-            day: 0,
-            hour: 0,
-            min: 0,
-            loop: 0
-        }, t);  
-        $time.min = t.min;
-
-        $time.hour = t.hour + Math.floor($time.min / 60);
-        $time.min %= 60;
-
-        $time.day = t.day + Math.floor($time.hour / 24);
-        $time.hour %= 24;
-
-        $time.loop = t.loop + Math.floor($time.day / 7);
-        $day %= 7;
-
-        var diff = -$time.compare(oldTime);
-        var event = new CustomEvent(&quot;onTimeChange&quot;, {
-            detail: {
-                oldTime,
-                newTime: t,
-                diff
-            }
-        });
-        document.dispatchEvent(event);
-
-        if ($time.loop &gt; oldTime.loop) {
-            event = new CustomEvent(&quot;onLoopChange&quot;, {
-                detail: {
-                    oldTime,
-                    newTime: t,
-                    diff
-                }
-            });
-            document.dispatchEvent(event);
-        }
-    },
-    compare: function(t) {
-        t = Object.assign({
-            day: 0,
-            hour: 0,
-            min: 0,
-            loop: 0
-        }, t); 
-        var day = t.day - $time.day;
-        var hour = t.hour - $time.hour;
-        var min = t.min - $time.min;
-        var loop = t.loop - ($time.loop - 1); // Since loop starts at 0
-
-        hour += Math.floor(min / 60);
-        day += Math.floor(hour / 24);
-
-        min %= 60;
-        hour %= 24;
-        day %= 7;
-
-        var isEqual = min == 0 &amp;&amp; hour == 0 &amp;&amp; day == 0;
-        var diff = min + (hour + day * 24) * 60;
-
-        return {
-            min, 
-            hour, 
-            day, 
-            isEqual, 
-            diff
-        };
-    },
-    dayString: function() {
-        return [&quot;monday&quot;, &quot;tuesday&quot;, &quot;wednesday&quot;, &quot;thursday&quot;, &quot;friday&quot;, &quot;saturday&quot;, &quot;sunday&quot;][$time.day];
-    },
-    time: function() {
-        return (&quot;00&quot; + $time.hour).slice(-2) + &quot;:&quot; + (&quot;00&quot; + $time.min).slice(-2);
-    }
-}, function(obj) {
-    // Moving takes 5 min
-    var playerMoveHandler = function(e) {
-        obj.add(e.detail.duration);
-    };
-    document.addEventListener(&quot;onPlayerMove&quot;, playerMoveHandler);
-})&gt;&gt;</tw-passagedata><tw-passagedata pid="8" name="StoryInit" tags="" position="200,200" size="100,100">&lt;&lt;include &quot;InitTime&quot;&gt;&gt;
-
-&lt;&lt;set $diary to helper.initObject({}, {
-    entries: [],
-    notes: &quot;&quot;,
-    addEntry: function(text) {
-        $diary.entries.push(text);
-        console.log($diary.entires);
-    },
-    DOM: function() {
-        var DOM = $(`&lt;div class=&quot;diary&quot;&gt;&lt;/div&gt;`);
-        
-        $diary.entries.forEach((entry) =&gt; {
-            var entryDOM = $(`&lt;p class=&quot;diary-entry&quot;&gt;${entry}&lt;/p&gt;`);
-            DOM.append(entryDOM);
-        });
-        
-        var notesDOM = $(`&lt;p contenteditable&gt;${$diary.notes}&lt;/p&gt;`);
-        
-        notesDOM.on(&quot;input&quot;, (e) =&gt; {
-           $diary.notes = notesDOM.text();
-        });
-
-        DOM.append(notesDOM);
-        
-        return DOM;
-    }
-}, function(obj) {
-    document.addEventListener(&quot;onQuestComplete&quot;, function(e) {
-        obj.addEntry(e.detail.quest.diary);
+&lt;&lt;set $npc to [&quot;$empress&quot;]&gt;&gt;</tw-passagedata><tw-passagedata pid="6" name="InitQuest" tags="init" position="725,100" size="100,100">&lt;&lt;set $questList to [
+    new Quest(&quot;Test quest&quot;, &quot;Some test event&quot;, {
+        onTimeChange: function(data) {this.done = true;}
     })
-})&gt;&gt;
+]&gt;&gt;</tw-passagedata><tw-passagedata pid="7" name="StoryInit" tags="" position="200,200" size="100,100">&lt;!-- Very important, do not remove, handles all of the events --&gt;
+&lt;&lt;set setup.eventHandler to new EventHandler()&gt;&gt;
 
-&lt;&lt;set $canMove to true&gt;&gt;
-&lt;&lt;set $debug to false&gt;&gt;
+&lt;&lt;set $time to new Time()&gt;&gt;
+&lt;&lt;set $diary to new Diary()&gt;&gt;
 
-&lt;&lt;include &quot;InitLocation&quot;&gt;&gt;
-&lt;&lt;include &quot;InitPlayer&quot;&gt;&gt;
+&lt;&lt;set $player to new Player(&quot;Living Quarter&quot;)&gt;&gt;
+
+&lt;&lt;set $locations to [
+    &quot;Living Quarter&quot;,
+    &quot;Observation Tower&quot;,
+    &quot;Great Hall&quot;,
+    &quot;Royal Court&quot;,
+    &quot;Library&quot;,
+    &quot;Temple&quot;,
+    &quot;The Great Bathouse&quot;,
+    &quot;Tuition Rooms&quot;,
+    &quot;Training Hall&quot;,
+    &quot;Following Someone Else&quot;,
+    &quot;Beyond the Palace&quot;
+]&gt;&gt;
+
 &lt;&lt;include &quot;InitNPC&quot;&gt;&gt;
-
-&lt;!-- WIP --&gt;
-&lt;&lt;include &quot;InitEvents&quot;&gt;&gt;</tw-passagedata><tw-passagedata pid="9" name="PassageHeader" tags="nobr" position="1100,100" size="100,100">&lt;&lt;set $passage to State.passage&gt;&gt;</tw-passagedata><tw-passagedata pid="10" name="PassageFooter" tags="nobr" position="1225,100" size="100,100">&lt;&lt;if $debug&gt;&gt;
+&lt;&lt;include &quot;InitQuest&quot;&gt;&gt;</tw-passagedata><tw-passagedata pid="8" name="PassageHeader" tags="nobr" position="975,100" size="100,100">&lt;&lt;set $passage to State.passage&gt;&gt;</tw-passagedata><tw-passagedata pid="9" name="PassageFooter" tags="nobr" position="1100,100" size="100,100">&lt;&lt;if $debug&gt;&gt;
     &lt;hr&gt;
     &lt;&lt;include &quot;debug&quot;&gt;&gt;
-&lt;&lt;/if&gt;&gt;</tw-passagedata><tw-passagedata pid="11" name="Room Template" tags="template" position="600,300" size="100,100">&lt;&lt;set _room to $player.position&gt;&gt;
+&lt;&lt;/if&gt;&gt;</tw-passagedata><tw-passagedata pid="10" name="Room Template" tags="template" position="600,300" size="100,100">&lt;&lt;set _room to $player.position&gt;&gt;
 &lt;h1&gt;&lt;&lt;= _room&gt;&gt;&lt;/h1&gt;
 
-&lt;&lt;travelSelect&gt;&gt;</tw-passagedata><tw-passagedata pid="12" name="Start" tags="nobr" position="400,100" size="100,100">&lt;&lt;set document.dispatchEvent(new CustomEvent(&quot;onStoryStart&quot;, {}))&gt;&gt;
+&lt;&lt;travelSelect&gt;&gt;</tw-passagedata><tw-passagedata pid="11" name="Start" tags="nobr" position="400,100" size="100,100">&lt;&lt;set document.dispatchEvent(new CustomEvent(&quot;onStoryStart&quot;, {}))&gt;&gt;
 
 &lt;h1&gt;The Curse of Nazanem&lt;/h1&gt;
 
@@ -986,10 +1099,12 @@ Reality point : &lt;&lt;= $player.realityPoint.current&gt;&gt; / &lt;&lt;= $play
 
 [[Test Event]]&lt;br&gt;
 
-[[Room Template]]&lt;br&gt;</tw-passagedata><tw-passagedata pid="13" name="Diary" tags="" position="400,300" size="100,100">!Diary
+[[Room Template]]&lt;br&gt;
+
+[[Calendar]]</tw-passagedata><tw-passagedata pid="12" name="Diary" tags="" position="400,300" size="100,100">!Diary
 &lt;&lt;diary&gt;&gt;
 
-&lt;&lt;return&gt;&gt;</tw-passagedata><tw-passagedata pid="14" name="Test Event" tags="" position="600,100" size="100,100">You stop short, staring at the opulence around you. You&#39;re finally here, Nazanem. Jewel of the river, the city lost to time, heart of an empire vanished into the sands.
+&lt;&lt;return&gt;&gt;</tw-passagedata><tw-passagedata pid="13" name="Test Event" tags="" position="600,100" size="100,100">You stop short, staring at the opulence around you. You&#39;re finally here, Nazanem. Jewel of the river, the city lost to time, heart of an empire vanished into the sands.
 Only in the oldest and most obscure writings have you seen sketches of this room, the great hall of the high palace, home of the empress. It has been your life&#39;s work, some would say your obsession, to stand here.
 
 At your feet the sand blows away with the wind coming in off the harbour below, bringing with it the sweet scent of spice and incense. The only thing that came with you from the present is gone, you&#39;re fairly certain you understand what happened now to Nazanem and you have every reason to believe you&#39;re the only person to ever comprehend it. It isn&#39;t easy to find a city cast adrift in time and space, let alone to follow it where it has gone.
@@ -1021,7 +1136,7 @@ A thrown rock from the more solid stairs confirms that beyond that point the ste
 &lt;&lt;/chooseoption&gt;&gt;
 &lt;&lt;/chooseoption&gt;&gt;
 &lt;&lt;/chooseoption&gt;&gt;
-&lt;&lt;/chooseoption&gt;&gt;</tw-passagedata><tw-passagedata pid="15" name="Widgets" tags="widget nobr" position="600,225" size="100,100">&lt;&lt;widget &quot;travelSelect&quot;&gt;&gt;
+&lt;&lt;/chooseoption&gt;&gt;</tw-passagedata><tw-passagedata pid="14" name="Widgets" tags="widget nobr" position="475,225" size="100,100">&lt;&lt;widget &quot;travelSelect&quot;&gt;&gt;
 &lt;ul class=&quot;location-list&quot;&gt;
     &lt;&lt;for _location range $locations&gt;&gt;
         &lt;&lt;capture _location&gt;&gt;

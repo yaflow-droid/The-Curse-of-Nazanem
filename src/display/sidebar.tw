@@ -1,9 +1,10 @@
 :: StoryCaption {"position":"0,200"}
 <<tabs "Time" selected>>\
 Loop: <<= $time.loop>>
-Day: <<= $time.dayString()>>
-Time: <<= $time.time()>>
+Day: <<= $time.dayString>>
+Time: <<= $time.time>>
 Reality point : <<= $player.realityPoint.current>> / <<= $player.realityPoint.max>>
+[[Calendar]]
 <<tab "Location">>\
     <<travelSelect>>
 <<tab "Skills">>\

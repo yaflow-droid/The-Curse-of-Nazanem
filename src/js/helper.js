@@ -27,10 +27,9 @@ helper.completeAssign = function (target, ...sources) {
     return target;
 }
 
-helper.initObject = function(defaults, values, listnerInit = (obj) => {}) {
+helper.initObject = function(defaults, values, listenerInit = (obj) => {}) {
     const obj = helper.completeAssign({}, defaults, values);
-    listnerInit(obj);
-    return obj;
+    return listenerInit(obj);
 }
 
 

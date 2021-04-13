@@ -1,0 +1,7 @@
+:: InitQuest [ init ]
+
+<<set $questList to [
+    new Quest("Test quest", "Some test event", {
+        onTimeChange: function(data) {this.done = true;}
+    })
+]>>

@@ -1,43 +1,25 @@
 :: StoryInit {"position":"200,200"}
-<<include "InitTime">>
+<!-- Very important, do not remove, handles all of the events -->
+<<set setup.eventHandler to new EventHandler()>>
 
-<<set $diary to helper.initObject({}, {
-    entries: [],
-    notes: "",
-    addEntry: function(text) {
-        $diary.entries.push(text);
-        console.log($diary.entires);
-    },
-    DOM: function() {
-        var DOM = $(`<div class="diary"></div>`);
-        
-        $diary.entries.forEach((entry) => {
-            var entryDOM = $(`<p class="diary-entry">${entry}</p>`);
-            DOM.append(entryDOM);
-        });
-        
-        var notesDOM = $(`<p contenteditable>${$diary.notes}</p>`);
-        
-        notesDOM.on("input", (e) => {
-           $diary.notes = notesDOM.text();
-        });
+<<set $time to new Time()>>
+<<set $diary to new Diary()>>
 
-        DOM.append(notesDOM);
-        
-        return DOM;
-    }
-}, function(obj) {
-    document.addEventListener("onQuestComplete", function(e) {
-        obj.addEntry(e.detail.quest.diary);
-    })
-})>>
+<<set $player to new Player("Living Quarter")>>
 
-<<set $canMove to true>>
-<<set $debug to false>>
+<<set $locations to [
+    "Living Quarter",
+    "Observation Tower",
+    "Great Hall",
+    "Royal Court",
+    "Library",
+    "Temple",
+    "The Great Bathouse",
+    "Tuition Rooms",
+    "Training Hall",
+    "Following Someone Else",
+    "Beyond the Palace"
+]>>
 
-<<include "InitLocation">>
-<<include "InitPlayer">>
 <<include "InitNPC">>
-
-<!-- WIP -->
-<<include "InitEvents">>
+<<include "InitQuest">>
